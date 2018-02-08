@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+	<meta charset="UTF-8" />
+	<title>Angular CLient WPS Demo</title>
+	<link rel="stylesheet" type="text/css" href="bootstrap-3.3.7/dist/css/bootstrap.min.css" />
+	<link rel="stylesheet" type="text/css" href="css/myStyle.css" />
+	<script src="js/xml2json.js"></script>
+</head>
+
+<body ng-app="angularApp" ng-controller="myController">
+	<!-- <div>Enter Text : <input type="text" ng-model = "textname"> {{textname}} </div> -->
+	<div class="col-md-12 col-sm-12 col-xs-12">
+		<div class="panel panel-info spacer">
+			<div class="panel-heading">
+				<center>
+					<h3>Démo Application WPS Configurable</h3>
+				</center>
+			</div>
+		</div>
+	</div>
+
+	<div class="col-md-12">
+		<div class="panel panel-info spacer">
+			<div class="panel-heading">
+				<form>
+					<b>Ajout d'un serveur: </b>
+					<input type="text" ng-model="monServeur.label" />
+					<button class="btn btn-primary" ng-click="verification()">Verifier</button>
+					<button class="btn btn-primary" ng-click="ajout()">Ajout</button>
+					<button class="btn btn-danger" ng-click="removeChecked()"> supprimer les choix </button>
+					<button class="btn btn-danger" ng-click="removeAll()"> supprimer tout </button>
+
+				</form>
+			</div>
+
+			<div>
+				
+			<div class="panel-body">
+				<table class="table">
+					<tr>
+						<th>
+							<b> Liste de serveur disponible :</b>
+						</th>
+					<!--	<th>select\deselect all
+							<input type="checkbox" ng-model="selectAll" ng-click="checkAll">
+						</th> -->
+						<br>
+					</tr>
+
+					<tr ng-repeat="item in items">
+						<td>
+								<input type="checkbox" ng-model="checked" ng-checked="exist(item)" ng-click="toggleSelection(item)">
+							<b>Nom Serveur : </b>{{item.label}}  
+						<!--	<button class="btn btn-danger" ng-click="remove(item._id)">supprimer</button>  -->
+							
+						   
+							<p> <b> Liste de process sauvegardé dans ce serveur : <b></p>
+							
+
+							<div ng-repeat="pro in item.process">
+									<ul> 
+										<li><input type="checkbox" ng-model="checked2" ng-checked="exist2(pro)" ng-click="toggleSelection2(pro)"> {{pro.name}}</li>
+									</ul>
+									
+									
+								</div>
+								<button class="btn btn-danger" ng-click="remove2(item)"> supprimer process </button>
+						</td>
+
+					</tr>
+		
+					<p ng-repeat="selectedItems in checked">{{selectedItems.label}}</p>
+					<td>
+						<b>Choisir un serveur:</b>
+						<select id="wps" ng-options="item as item.label for item in items" ng-model="selected">
+							<option value="">Sélectionnez un Serveur WPS</option>
+						</select>
+						<input value="GET DATA" class="btn btn-primary" type='button' ng-click='config()' />
+						<input value="Display INFO" class="btn btn-primary" type='button' ng-click='getData()' />
+						<br>
+					</td>
+				</table>
+			</div>
+		</div>
+	</div>
+
+	<!-- test angularjs ################################################################################################################################################-->
+	<!-- réponse getCapabilities -->
+	<div class="container" ng-if="selected">
+		<div class="row">
+			<div ng-if="selected">
+				<div class="col-md-12" ng-if="processes">
+					<div class="panel panel-info spacer">
+						<div class="panel-heading">
+							<h3>List of Process</h3>
+							<div class="wps-container">
+								<select multiple="multiple" ng-model="process">
+									<option ng-repeat="o in processes">{{o.Identifier.__text}}</option>
+								</select>
+								<b>{{process["0"]}}</b>
+								<input value="Ajout BDD" type='button' class="btn btn-primary" ng-click="ajoutprobdd(selected._id,process['0'])" />
+								<br>
+								<br>
+								<input value="GET Description" type='button' class="btn btn-primary" ng-click="getDescriptionProcess(process['0'])" />
+								<input value="Display Description	" type='button' class="btn btn-primary" ng-click='getData2()' />
+								<input type="button" class="btn btn-primary" id="next" value="Executer" ng-click="ExecuteProcess(process['0']);" />
+								<input type="button" class="btn btn-primary" id="next" value="Display Executer" ng-click="getData3();" />
+
+								<br>
+								<div ng-if="descriptionProcess">
+									<h3>Description du Process </h3>
+									<p>
+
+										<span>
+											<strong>Nom Process : </strong>{{descriptionProcess.ProcessDescriptions.ProcessDescription.Title.__text}}</span>
+										<br>
+										<!--<span>
+											<strong>Version</strong> {{descriptionProcess.ProcessDescriptions._version}}</span>
+										<br>-->
+										<!--<span>
+											<strong>prefix </strong>{{descriptionProcess.ProcessDescriptions.ProcessDescription.Abstract.__prefix}}</span>
+										<br>-->
+									<!--	<span>
+											<strong>Process </strong>{{descriptionProcess.ProcessDescriptions._service}}</span>
+										<br>-->
+										<span>
+											<strong>Description : </strong>{{descriptionProcess.ProcessDescriptions.ProcessDescription.Abstract.__text}}</span>
+										<br>
+										<span>
+											<strong>Listes de entrées requis : </strong>
+										</span>
+										<br>
+										<span ng-if="inputs">
+												<div ng-repeat="obj in inputs ">
+													<div id="contenu"> {{obj.Abstract.__text}}</div>
+													<br>
+												</div>
+											</span>
+											</span>
+		
+											<span ng-if="descriptionProcess.ProcessDescriptions.ProcessDescription.DataInputs.Input.Title">
+													<div id="contenu">	{{descriptionProcess.ProcessDescriptions.ProcessDescription.DataInputs.Input.Title.__text}}</div>
+										</span>	
+										<!--<span>
+											<strong>Title </strong>{{descriptionProcess.ProcessDescriptions.ProcessDescription.Title.__text}}</span>
+										<br>
+										<span>
+											<strong>Abstract value </strong>{{descriptionProcess.ProcessDescriptions._service}}</span>
+										<br>
+										<span>
+											<strong>Idetifier </strong>{{descriptionProcess.ProcessDescriptions.ProcessDescription.DataInputs.Input.Identifier.__text}}</span>
+										<br>
+										<span>
+											<strong>minOccurs </strong>{{descriptionProcess.ProcessDescriptions.ProcessDescription.DataInputs.Input._minOccurs}}</span>
+										<br>
+										<span>
+											<strong>maxOccurs </strong>{{descriptionProcess.ProcessDescriptions.ProcessDescription.DataInputs.Input._maxOccurs}}</span>
+										<br>
+										<span>
+											<strong>complexData: </strong>{{descriptionProcess.ProcessDescriptions.ProcessDescription.DataInputs.Input.ComplexData}}</span>
+										<br>
+										<br>
+										<br>
+
+										<span>
+											<strong>OUTputs </strong>
+										</span>
+										<br>
+										<span>
+											<strong>Title </strong>{{descriptionProcess.ProcessDescriptions.ProcessDescription.ProcessOutputs.Output.Title.__text}}</span>
+										<br>
+										<span>
+											<strong>Abstract value </strong>{{descriptionProcess.ProcessDescriptions.ProcessDescription.ProcessOutputs.Output.Abstract.__text}}</span>
+										<br>
+										<span>
+											<strong>Idetifier </strong>{{descriptionProcess.ProcessDescriptions.ProcessDescription.ProcessOutputs.Output.Identifier.__text}}</span>
+										<br>
+										<span>
+											<strong>literalData: </strong>{{descriptionProcess.ProcessDescriptions.ProcessDescription.ProcessOutputs.Output.LiteralOutput}}</span>
+										<br>
+										-->
+									</p>
+
+
+								</div>
+							</div>
+							<!--	<p><input type="file" onchange="loadfile(this)"></p>-->
+						</div>
+					</div>
+				</div>
+				<div class="col-md-12 ">
+
+					<div class="col-md-12 col-sm-12 col-xs-12" ng-if="descriptionProcess">
+						<div class="panel panel-info spacer">
+							<div class="panel-heading">
+								<p> <b>Liste des entréess :</b></p>
+
+								<div>
+									<div class="divName" name="divName">Inputs</div>
+									<span ng-if="descriptionProcess.ProcessDescriptions.ProcessDescription.DataInputs.Input['0']">
+									<span ng-if="inputs">
+										<div ng-repeat="obj in inputs ">
+											<div id="contenu"> {{obj.Abstract.__text}}</div>
+											<input type="text" name='myInputs' id='myInputs' />
+											
+											<br>
+										</div>
+									</span>
+									</span>
+
+									<span ng-if="descriptionProcess.ProcessDescriptions.ProcessDescription.DataInputs.Input.Title">
+											<div id="contenu">	{{descriptionProcess.ProcessDescriptions.ProcessDescription.DataInputs.Input.Title.__text}}</div>
+											<input type="text" name='myInputs' id='myInputs' />
+											<!--<button class="btn btn-primary" ng-click="toto()">recuperer</button> -->
+											
+									</span>		
+								
+								</div>
+								<div>
+									<div class="divName" name="divName">OUTPUTS</div>
+									<span ng-if="descriptionProcess.ProcessDescriptions.ProcessDescription.ProcessOutputs.Output['0']">
+										<p ng-repeat="obj in descriptionProcess.ProcessDescriptions.ProcessDescription.ProcessOutputs.Output">
+											{{obj.Title.__text}}
+											<br>
+										</p>
+									</span>
+									<p ng-if="descriptionProcess.ProcessDescriptions.ProcessDescription.ProcessOutputs.Output.Title">
+										{{descriptionProcess.ProcessDescriptions.ProcessDescription.ProcessOutputs.Output.Title.__text}}
+										<br>
+									</p>
+								</div>
+							</div>
+						</div>
+
+						<div ng-if="result4">
+							<textarea rows="15" cols="80" id="pikou">{{result4}}</textarea>
+							<br>
+							<span>
+								<strong> Resultat : </strong>
+								<br>
+								<textarea rows="1" cols="80" id="2">{{resProcess.ExecuteResponse.ProcessOutputs.Output.Data.LiteralData.__text}}</textarea>
+							</span>
+
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- test angularjs ################################################################################################################################################-->
+	<!-- réponse getCapabilities -->
+
+	<div class="col-md-12 col-sm-12 col-xs-12">
+		<div class="panel panel-info spacer">
+			<div class="panel-heading">
+				<center>
+					<p>PROJET MPA M2 ILIADE </p>
+				</center>
+			</div>
+		</div>
+	</div>
+
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.32/angular.min.js"></script>
+	<script type="text/javascript" src="js/myAngularApp.js"></script>
+</body>
+</html>
